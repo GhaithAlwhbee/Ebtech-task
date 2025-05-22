@@ -7,14 +7,16 @@ import 'package:ebtech_task/data/repositories/product_repo.dart';
 import 'package:ebtech_task/provider/cart_provider.dart';
 import 'package:ebtech_task/provider/products_provider.dart';
 import 'package:ebtech_task/utill/app_constants.dart';
+import 'package:ebtech_task/utill/network_info.dart';
 import 'package:get_it/get_it.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // Core
-  sl.registerLazySingleton(() => DioClient(baseUrl: AppConstants.baseUrl,dio:  sl()));
+  sl.registerLazySingleton(() => DioClient(baseUrl: AppConstants.baseUrl,dio:  sl(),networkInfo: sl()));
 
   // Repository
   sl.registerLazySingleton(() => ProductRepo(dioClient: sl()));
@@ -27,6 +29,8 @@ Future<void> init() async {
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => InternetConnectionChecker.instance);
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
   sl.registerLazySingleton(() => Dio());
   // sl.registerLazySingleton(() => LoggingInterceptor());
 }

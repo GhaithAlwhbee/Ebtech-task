@@ -3,14 +3,17 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:ebtech_task/utill/network_info.dart';
 
 class DioClient {
   final String baseUrl;
   Dio dio;
+  final NetworkInfo networkInfo;
 
   DioClient({
     required this.baseUrl,
     required this.dio,
+    required this.networkInfo,
   }) {
     dio
       ..options.baseUrl = baseUrl
@@ -29,21 +32,25 @@ class DioClient {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    try {
-      var response = await dio.get(
-        uri,
-        queryParameters: queryParameters,
-        options: options,
-        cancelToken: cancelToken,
-        onReceiveProgress: onReceiveProgress,
-      );
-      return response;
-    } on SocketException catch (e) {
-      throw SocketException(e.toString());
-    } on FormatException catch (_) {
-      throw const FormatException("Unable to process the data");
-    } catch (e) {
-      rethrow;
+    if (await networkInfo.isConnected) {
+      try {
+        var response = await dio.get(
+          uri,
+          queryParameters: queryParameters,
+          options: options,
+          cancelToken: cancelToken,
+          onReceiveProgress: onReceiveProgress,
+        );
+        return response;
+      } on SocketException catch (e) {
+        throw SocketException(e.toString());
+      } on FormatException catch (_) {
+        throw const FormatException("Unable to process the data");
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      throw const SocketException('check you internet connection');
     }
   }
 }

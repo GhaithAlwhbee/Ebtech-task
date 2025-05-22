@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 class ApiErrorHandler {
@@ -31,6 +33,8 @@ class ApiErrorHandler {
               errorDescription = "Connection Error with API server";
               break;
           }
+        } else if (error is SocketException) {
+          errorDescription = error.message;
         } else {
           errorDescription = "Unexpected error occured";
         }
